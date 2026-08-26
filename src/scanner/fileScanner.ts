@@ -2,6 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileTypeFromFile } from "file-type";
 import { getImageDimensions } from "../metadata/imageMetadata.js";
+import { getFileHash } from "../utils/fileHash.js";
 
 const IGNORED_DIRECTORIES = new Set([
   "node_modules",
@@ -31,7 +32,7 @@ const MIME_TYPES: Record<string, string> = {
   ".avif": "image/avif",
 };
 
-type AssetInfo = {
+export type AssetInfo = {
   name: string;
   path: string;
   extension: string;
@@ -40,6 +41,7 @@ type AssetInfo = {
   mimeType: string;
   detectedMimeType?: string;
   typeMismatch: boolean;
+  hash?: string;
   width?: number;
   height?: number;
 };
@@ -78,6 +80,8 @@ export async function scanFiles(projectRoot: string): Promise<AssetInfo[]> {
 
       const dimensions = await getImageDimensions(fullPath);
 
+      const hash = await getFileHash(fullPath);
+
       const asset: AssetInfo = {
         name: entry.name,
         path: fullPath,
@@ -85,6 +89,7 @@ export async function scanFiles(projectRoot: string): Promise<AssetInfo[]> {
         size: stats.size,
         mimeType,
         typeMismatch: false,
+        hash,
       };
 
       if (detectedType) {
