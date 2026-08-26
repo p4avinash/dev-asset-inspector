@@ -2,6 +2,11 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileTypeFromFile } from "file-type";
 import { getImageDimensions } from "../metadata/imageMetadata.js";
+import { getFileHash } from "../utils/fileHash.js";
+import {
+  shouldIgnore,
+  shouldIgnoreDirectory,
+} from "../config/ignoreMatcher.js";
 
 const IGNORED_DIRECTORIES = new Set([
   "node_modules",
@@ -11,7 +16,7 @@ const IGNORED_DIRECTORIES = new Set([
   "coverage",
 ]);
 
-const ASSET_EXTENSIONS = new Set([
+const DEFAULT_ASSET_EXTENSIONS = new Set([
   ".png",
   ".jpg",
   ".jpeg",
@@ -29,9 +34,10 @@ const MIME_TYPES: Record<string, string> = {
   ".gif": "image/gif",
   ".svg": "image/svg+xml",
   ".avif": "image/avif",
+  ".ico": "image/x-icon",
 };
 
-type AssetInfo = {
+export type AssetInfo = {
   name: string;
   path: string;
   extension: string;
@@ -40,12 +46,38 @@ type AssetInfo = {
   mimeType: string;
   detectedMimeType?: string;
   typeMismatch: boolean;
+  hash?: string;
   width?: number;
   height?: number;
 };
 
-export async function scanFiles(projectRoot: string): Promise<AssetInfo[]> {
+function normalizeExtensions(additionalExtensions: string[]): Set<string> {
+  return new Set(
+    additionalExtensions.map((extension) => {
+      const normalizedExtension = extension.trim().toLowerCase();
+
+      return normalizedExtension.startsWith(".")
+        ? normalizedExtension
+        : `.${normalizedExtension}`;
+    }),
+  );
+}
+
+export async function scanFiles(
+  projectRoot: string,
+  ignorePatterns: string[] = [],
+  scanRoot: string = projectRoot,
+  additionalExtensions: string[] = [],
+): Promise<AssetInfo[]> {
   const assets: AssetInfo[] = [];
+
+  const customExtensions = normalizeExtensions(additionalExtensions);
+
+  const assetExtensions = new Set([
+    ...DEFAULT_ASSET_EXTENSIONS,
+    ...customExtensions,
+  ]);
+
   const entries = fs.readdirSync(projectRoot, { withFileTypes: true });
 
   for (const entry of entries) {
@@ -56,13 +88,26 @@ export async function scanFiles(projectRoot: string): Promise<AssetInfo[]> {
         continue;
       }
 
-      const childAssets = await scanFiles(fullPath);
+      if (shouldIgnoreDirectory(fullPath, scanRoot, ignorePatterns)) {
+        continue;
+      }
+
+      const childAssets = await scanFiles(
+        fullPath,
+        ignorePatterns,
+        scanRoot,
+        additionalExtensions,
+      );
 
       assets.push(...childAssets);
     } else if (entry.isFile()) {
+      if (shouldIgnore(fullPath, scanRoot, ignorePatterns)) {
+        continue;
+      }
+
       const extension = path.extname(entry.name).toLowerCase();
 
-      if (!ASSET_EXTENSIONS.has(extension)) {
+      if (!assetExtensions.has(extension)) {
         continue;
       }
 
@@ -78,6 +123,8 @@ export async function scanFiles(projectRoot: string): Promise<AssetInfo[]> {
 
       const dimensions = await getImageDimensions(fullPath);
 
+      const hash = await getFileHash(fullPath);
+
       const asset: AssetInfo = {
         name: entry.name,
         path: fullPath,
@@ -85,6 +132,7 @@ export async function scanFiles(projectRoot: string): Promise<AssetInfo[]> {
         size: stats.size,
         mimeType,
         typeMismatch: false,
+        hash,
       };
 
       if (detectedType) {
