@@ -2,19 +2,19 @@
   "name": "dev-asset-inspector",
   "version": "1.0.0",
   "description": "WIP",
-"exports": {
-  ".": {
-    "types": "./dist/index.d.ts",
-    "import": "./dist/index.js"
-  }
-},
-"files": [
-  "dist"
-],
-"scripts": {
-  "build": "tsc",
-  "prepublishOnly": "npm run build"
-},
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "prepublishOnly": "npm run build"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/p4avinash/dev-asset-inspector.git"
@@ -28,9 +28,10 @@
   },
   "homepage": "https://github.com/p4avinash/dev-asset-inspector#readme",
   "devDependencies": {
-    "react": "^19.2.8",
+    "@types/node": "^26.3.0",
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.5",
+    "react": "^19.2.8",
     "typescript": "^7.0.2"
   },
   "peerDependencies": {
