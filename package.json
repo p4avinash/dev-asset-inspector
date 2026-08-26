@@ -38,6 +38,7 @@
     "react": ">=18"
   },
   "dependencies": {
+    "file-type": "^22.0.2",
     "image-dimensions": "^2.5.1"
   }
 }
