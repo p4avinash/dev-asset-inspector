@@ -19,6 +19,8 @@ export function analyzeOptimization(
   assets: AssetInfo[],
   options: OptimizationOptions = {},
 ): OptimizationResult[] {
+  const highSeverityScore = options?.highSeverityScore ?? 2;
+
   return assets.map((asset) => {
     const ruleResults: OptimizationRuleResult[] = [];
 
@@ -47,7 +49,7 @@ export function analyzeOptimization(
     };
 
     if (isCandidate) {
-      optimizationResult.severity = score >= 2 ? "high" : "low";
+      optimizationResult.severity = score >= highSeverityScore ? "high" : "low";
     }
 
     return optimizationResult;

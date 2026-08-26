@@ -9,6 +9,7 @@ export type OptimizationOptions = {
   maxFileSize?: number;
   maxWidth?: number;
   maxHeight?: number;
+  highSeverityScore?: number;
 };
 
 export type OptimizationRule = (
