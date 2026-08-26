@@ -36,5 +36,8 @@
   },
   "peerDependencies": {
     "react": ">=18"
+  },
+  "dependencies": {
+    "image-dimensions": "^2.5.1"
   }
 }
