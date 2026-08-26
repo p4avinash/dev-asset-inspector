@@ -57,7 +57,7 @@ const assets = await scanFiles(
 
 const duplicateGroups = findDuplicates(assets);
 
-const optimizationResults = analyzeOptimization(assets);
+const optimizationResults = analyzeOptimization(assets, config.optimization);
 
 const usageResults = analyzeAssetUsage(projectRoot, assets);
 

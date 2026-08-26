@@ -6,6 +6,12 @@ export type AssetInspectorConfig = {
     ignore?: string[];
     extensions?: string[];
   };
+
+  optimization?: {
+    maxFileSize?: number;
+    maxWidth?: number;
+    maxHeight?: number;
+  };
 };
 
 export function loadConfig(projectRoot: string): AssetInspectorConfig {
