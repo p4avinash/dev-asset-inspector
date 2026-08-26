@@ -13,6 +13,14 @@ export type AssetInspectionSummary = {
   optimizationCandidates: number;
   highSeverityCandidates: number;
   typeMismatches: number;
+
+  topIssues: string[];
+
+  highestImpactAssets: {
+    asset: AssetInfo;
+    score: number;
+    priority: ImpactResult["priority"];
+  }[];
 };
 
 export type AssetInspectionReport = {
@@ -29,6 +37,7 @@ function createSummary(
   duplicates: DuplicateGroup[],
   optimization: OptimizationResult[],
   usage: AssetUsageResult[],
+  impact: ImpactResult[],
 ): AssetInspectionSummary {
   const usedAssets = usage.filter((result) => result.status === "USED").length;
 
@@ -51,6 +60,48 @@ function createSummary(
     (result) => result.severity === "high",
   ).length;
 
+  // --------------------------------
+  // TOP ISSUES
+  // --------------------------------
+
+  const topIssues: string[] = [];
+
+  if (unusedAssets > 0) {
+    topIssues.push(`${unusedAssets} unused assets`);
+  }
+
+  if (wastedBytes > 0) {
+    topIssues.push(`${wastedBytes} bytes potentially wasted by duplicates`);
+  }
+
+  if (highSeverityCandidates > 0) {
+    topIssues.push(
+      `${highSeverityCandidates} high-severity optimization candidates`,
+    );
+  }
+
+  if (typeMismatches > 0) {
+    topIssues.push(`${typeMismatches} file type mismatches`);
+  }
+
+  if (topIssues.length === 0) {
+    topIssues.push("No major asset issues found");
+  }
+
+  // --------------------------------
+  // HIGHEST IMPACT ASSETS
+  // --------------------------------
+
+  const highestImpactAssets = [...impact]
+    .filter((result) => result.score > 0)
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 5)
+    .map((result) => ({
+      asset: result.asset,
+      score: result.score,
+      priority: result.priority,
+    }));
+
   return {
     totalAssets: assets.length,
     usedAssets,
@@ -60,6 +111,8 @@ function createSummary(
     optimizationCandidates: optimizationCandidates.length,
     highSeverityCandidates,
     typeMismatches,
+    topIssues,
+    highestImpactAssets,
   };
 }
 
@@ -70,7 +123,13 @@ export function createAssetInspectionReport(
   usage: AssetUsageResult[],
   impact: ImpactResult[],
 ): AssetInspectionReport {
-  const summary = createSummary(assets, duplicates, optimization, usage);
+  const summary = createSummary(
+    assets,
+    duplicates,
+    optimization,
+    usage,
+    impact,
+  );
 
   return {
     assets,

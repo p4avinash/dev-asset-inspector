@@ -67,6 +67,11 @@ const impactResults = analyzeImpact(
   duplicateGroups,
   optimizationResults,
   usageResults,
+  config.impact?.weights
+    ? {
+        weights: config.impact.weights,
+      }
+    : {},
 );
 
 // --------------------------------
