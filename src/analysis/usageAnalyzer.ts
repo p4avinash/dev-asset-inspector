@@ -21,10 +21,13 @@ const IGNORED_DIRECTORIES = new Set([
   "coverage",
 ]);
 
+export type AssetUsageStatus = "USED" | "NOT_REFERENCED";
+
 export type AssetUsageResult = {
   asset: AssetInfo;
-  isUsed: boolean;
+  status: AssetUsageStatus;
   referencedIn: string[];
+  referenceCount: number;
 };
 
 function collectSourceFiles(projectRoot: string): string[] {
@@ -238,8 +241,9 @@ export function analyzeAssetUsage(
 
     return {
       asset,
-      isUsed: referencedIn.length > 0,
+      status: referencedIn.length > 0 ? "USED" : "NOT_REFERENCED",
       referencedIn,
+      referenceCount: referencedIn.length,
     };
   });
 }

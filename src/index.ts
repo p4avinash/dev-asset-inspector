@@ -1,80 +1,83 @@
+import fs from "node:fs";
+
 import { scanFiles } from "./scanner/fileScanner.js";
 import { findDuplicates } from "./analysis/duplicateDetector.js";
 import { analyzeOptimization } from "./analysis/optimizationAnalyzer.js";
 import { analyzeAssetUsage } from "./analysis/usageAnalyzer.js";
+import { createAssetInspectionReport } from "./report/reportGenerator.js";
+import { formatAssetInspectionReport } from "./report/reportFormatter.js";
+import { parseArguments, printHelp } from "./cli/argumentParser.js";
+import { formatAssetInspectionReportAsJson } from "./report/reportJsonFormatter.js";
+import { loadConfig } from "./config/configLoader.js";
 
-const projectRoot = "C:\\Study\\NPM\\asset-inspector-consumer";
+const parseResult = parseArguments(process.argv.slice(2));
 
-const assets = await scanFiles(projectRoot);
+if (!parseResult.success) {
+  console.error(parseResult.error);
+  console.error('Run "asset-inspector --help" for usage.');
+  process.exit(1);
+}
 
-console.log("FOUND ASSETS:", assets);
+const { projectRoot, json, help } = parseResult.options;
 
-// -------------------------
-// DUPLICATE ANALYSIS
-// -------------------------
+if (help) {
+  printHelp();
+  process.exit(0);
+}
+
+if (!projectRoot) {
+  console.error("Please provide a project path.");
+  process.exit(1);
+}
+
+if (!fs.existsSync(projectRoot)) {
+  console.error(`Project path does not exist: ${projectRoot}`);
+
+  process.exit(1);
+}
+
+if (!fs.statSync(projectRoot).isDirectory()) {
+  console.error(`Project path is not a directory: ${projectRoot}`);
+
+  process.exit(1);
+}
+
+const config = loadConfig(projectRoot);
+
+// --------------------------------
+// ANALYSIS
+// --------------------------------
+
+const assets = await scanFiles(
+  projectRoot,
+  config.assets?.ignore ?? [],
+  projectRoot,
+  config.assets?.extensions ?? [],
+);
 
 const duplicateGroups = findDuplicates(assets);
 
-console.log("\nDUPLICATE GROUPS:");
-
-for (const [index, group] of duplicateGroups.entries()) {
-  console.log(`\nGroup ${index + 1}`);
-  console.log("Hash:", group.hash);
-  console.log("Canonical:", group.canonicalAsset.name);
-  console.log("Total size:", group.totalSize, "bytes");
-  console.log("Potentially wasted:", group.wastedSize, "bytes");
-
-  console.log("Files:");
-
-  for (const asset of group.assets) {
-    console.log(`- ${asset.name}`);
-  }
-}
-
-// -------------------------
-// OPTIMIZATION ANALYSIS
-// -------------------------
-
 const optimizationResults = analyzeOptimization(assets);
-
-console.log("\nOPTIMIZATION CANDIDATES:");
-
-for (const result of optimizationResults) {
-  if (!result.isCandidate) {
-    continue;
-  }
-
-  console.log(`\nFile: ${result.asset.name}`);
-  console.log("Size:", result.asset.size, "bytes");
-  console.log(
-    "Dimensions:",
-    `${result.asset.width ?? "unknown"} × ${result.asset.height ?? "unknown"}`,
-  );
-  console.log("Score:", result.score);
-  console.log("Severity:", result.severity);
-  console.log("Reasons:");
-
-  for (const reason of result.reasons) {
-    console.log(`- ${reason}`);
-  }
-}
-
-// -------------------------
-// ASSET USAGE ANALYSIS
-// -------------------------
 
 const usageResults = analyzeAssetUsage(projectRoot, assets);
 
-console.log("\nASSET USAGE:");
+// --------------------------------
+// REPORT
+// --------------------------------
 
-for (const result of usageResults) {
-  console.log(`\n- ${result.asset.name}: ${result.isUsed ? "USED" : "UNUSED"}`);
+const report = createAssetInspectionReport(
+  assets,
+  duplicateGroups,
+  optimizationResults,
+  usageResults,
+);
 
-  if (result.isUsed) {
-    console.log("  Referenced in:");
+// --------------------------------
+// CLI OUTPUT
+// --------------------------------
 
-    for (const sourceFile of result.referencedIn) {
-      console.log(`  - ${sourceFile}`);
-    }
-  }
+if (json) {
+  console.log(formatAssetInspectionReportAsJson(report));
+} else {
+  console.log(formatAssetInspectionReport(report));
 }

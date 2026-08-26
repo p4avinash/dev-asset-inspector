@@ -8,9 +8,13 @@
       "import": "./dist/index.js"
     }
   },
-  "files": [
-    "dist"
-  ],
+"bin": {
+  "asset-inspector": "./bin/asset-inspector.cmd"
+},
+"files": [
+  "dist",
+  "bin"
+],
   "scripts": {
     "build": "tsc",
     "prepublishOnly": "npm run build"
