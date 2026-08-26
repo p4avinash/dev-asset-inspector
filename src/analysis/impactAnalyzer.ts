@@ -12,11 +12,27 @@ export type ImpactResult = {
   reasons: string[];
 };
 
-const SCORE_UNUSED = 3;
-const SCORE_DUPLICATE = 2;
-const SCORE_TYPE_MISMATCH = 2;
-const SCORE_OPTIMIZATION_LOW = 1;
-const SCORE_OPTIMIZATION_HIGH = 2;
+export type ImpactOptions = {
+  weights?: {
+    unused?: number;
+    duplicate?: number;
+    typeMismatch?: number;
+    optimization?: {
+      low?: number;
+      high?: number;
+    };
+  };
+};
+
+const DEFAULT_WEIGHTS = {
+  unused: 3,
+  duplicate: 2,
+  typeMismatch: 2,
+  optimization: {
+    low: 1,
+    high: 2,
+  },
+};
 
 function getPriority(score: number): ImpactPriority {
   if (score >= 6) {
@@ -39,7 +55,21 @@ export function analyzeImpact(
   duplicateGroups: DuplicateGroup[],
   optimizationResults: OptimizationResult[],
   usageResults: AssetUsageResult[],
+  options: ImpactOptions = {},
 ): ImpactResult[] {
+  const weights = {
+    unused: options.weights?.unused ?? DEFAULT_WEIGHTS.unused,
+    duplicate: options.weights?.duplicate ?? DEFAULT_WEIGHTS.duplicate,
+    typeMismatch: options.weights?.typeMismatch ?? DEFAULT_WEIGHTS.typeMismatch,
+    optimization: {
+      low:
+        options.weights?.optimization?.low ?? DEFAULT_WEIGHTS.optimization.low,
+      high:
+        options.weights?.optimization?.high ??
+        DEFAULT_WEIGHTS.optimization.high,
+    },
+  };
+
   return assets.map((asset) => {
     let score = 0;
     const reasons: string[] = [];
@@ -49,7 +79,7 @@ export function analyzeImpact(
     );
 
     if (usageResult?.status === "NOT_REFERENCED") {
-      score += SCORE_UNUSED;
+      score += weights.unused;
       reasons.push("Unused asset");
     }
 
@@ -58,12 +88,12 @@ export function analyzeImpact(
     );
 
     if (isDuplicate) {
-      score += SCORE_DUPLICATE;
+      score += weights.duplicate;
       reasons.push("Duplicate asset");
     }
 
     if (asset.typeMismatch) {
-      score += SCORE_TYPE_MISMATCH;
+      score += weights.typeMismatch;
       reasons.push("File type mismatch");
     }
 
@@ -73,10 +103,10 @@ export function analyzeImpact(
 
     if (optimizationResult?.isCandidate) {
       if (optimizationResult.severity === "high") {
-        score += SCORE_OPTIMIZATION_HIGH;
+        score += weights.optimization.high;
         reasons.push("High optimization priority");
       } else {
-        score += SCORE_OPTIMIZATION_LOW;
+        score += weights.optimization.low;
         reasons.push("Optimization opportunity");
       }
     }

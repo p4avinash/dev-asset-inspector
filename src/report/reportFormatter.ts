@@ -24,6 +24,35 @@ export function formatAssetInspectionReport(
   lines.push(`Type mismatches: ${report.summary.typeMismatches}`);
 
   // --------------------------------
+  // TOP ISSUES
+  // --------------------------------
+
+  lines.push("");
+  lines.push("TOP ISSUES:");
+
+  for (const issue of report.summary.topIssues) {
+    lines.push(`- ${issue}`);
+  }
+
+  // --------------------------------
+  // HIGHEST IMPACT ASSETS
+  // --------------------------------
+
+  lines.push("");
+  lines.push("HIGHEST IMPACT ASSETS:");
+
+  if (report.summary.highestImpactAssets.length === 0) {
+    lines.push("No impacted assets found.");
+  }
+
+  for (const [index, result] of report.summary.highestImpactAssets.entries()) {
+    lines.push("");
+    lines.push(`${index + 1}. ${result.asset.name}`);
+    lines.push(`   Score: ${result.score}`);
+    lines.push(`   Priority: ${result.priority}`);
+  }
+
+  // --------------------------------
   // DUPLICATES
   // --------------------------------
 
@@ -101,7 +130,7 @@ export function formatAssetInspectionReport(
       lines.push("  Referenced in:");
 
       for (const sourceFile of result.referencedIn) {
-        lines.push("  - " + sourceFile);
+        lines.push(`  - ${sourceFile}`);
       }
     }
   }
