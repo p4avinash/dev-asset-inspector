@@ -2,6 +2,7 @@ import type { AssetInfo } from "../scanner/fileScanner.js";
 import type { DuplicateGroup } from "../analysis/duplicateDetector.js";
 import type { OptimizationResult } from "../analysis/optimizationAnalyzer.js";
 import type { AssetUsageResult } from "../analysis/usageAnalyzer.js";
+import type { ImpactResult } from "../analysis/impactAnalyzer.js";
 
 export type AssetInspectionSummary = {
   totalAssets: number;
@@ -19,6 +20,7 @@ export type AssetInspectionReport = {
   duplicates: DuplicateGroup[];
   optimization: OptimizationResult[];
   usage: AssetUsageResult[];
+  impact: ImpactResult[];
   summary: AssetInspectionSummary;
 };
 
@@ -66,6 +68,7 @@ export function createAssetInspectionReport(
   duplicates: DuplicateGroup[],
   optimization: OptimizationResult[],
   usage: AssetUsageResult[],
+  impact: ImpactResult[],
 ): AssetInspectionReport {
   const summary = createSummary(assets, duplicates, optimization, usage);
 
@@ -74,6 +77,7 @@ export function createAssetInspectionReport(
     duplicates,
     optimization,
     usage,
+    impact,
     summary,
   };
 }

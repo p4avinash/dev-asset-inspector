@@ -6,7 +6,18 @@ export type AssetInspectorConfig = {
     ignore?: string[];
     extensions?: string[];
   };
+
+  optimization?: {
+    maxFileSize?: number;
+    maxWidth?: number;
+    maxHeight?: number;
+    highSeverityScore?: number;
+  };
 };
+
+function isPositiveNumber(value: unknown): value is number {
+  return typeof value === "number" && Number.isFinite(value) && value > 0;
+}
 
 export function loadConfig(projectRoot: string): AssetInspectorConfig {
   const configPath = path.join(projectRoot, "asset-inspector.config.json");
@@ -28,7 +39,18 @@ export function loadConfig(projectRoot: string): AssetInspectorConfig {
       ignore?: unknown;
       extensions?: unknown;
     };
+
+    optimization?: {
+      maxFileSize?: unknown;
+      maxWidth?: unknown;
+      maxHeight?: unknown;
+      highSeverityScore?: unknown;
+    };
   };
+
+  // --------------------------------
+  // ASSETS CONFIG VALIDATION
+  // --------------------------------
 
   if (typedConfig.assets !== undefined) {
     if (typeof typedConfig.assets !== "object" || typedConfig.assets === null) {
@@ -52,6 +74,51 @@ export function loadConfig(projectRoot: string): AssetInspectorConfig {
     ) {
       throw new Error(
         '"assets.extensions" must be an array in asset-inspector.config.json',
+      );
+    }
+  }
+
+  // --------------------------------
+  // OPTIMIZATION CONFIG VALIDATION
+  // --------------------------------
+
+  if (typedConfig.optimization !== undefined) {
+    if (
+      typeof typedConfig.optimization !== "object" ||
+      typedConfig.optimization === null
+    ) {
+      throw new Error(
+        '"optimization" must be an object in asset-inspector.config.json',
+      );
+    }
+
+    const { maxFileSize, maxWidth, maxHeight, highSeverityScore } =
+      typedConfig.optimization;
+
+    if (maxFileSize !== undefined && !isPositiveNumber(maxFileSize)) {
+      throw new Error(
+        '"optimization.maxFileSize" must be a positive number in asset-inspector.config.json',
+      );
+    }
+
+    if (maxWidth !== undefined && !isPositiveNumber(maxWidth)) {
+      throw new Error(
+        '"optimization.maxWidth" must be a positive number in asset-inspector.config.json',
+      );
+    }
+
+    if (maxHeight !== undefined && !isPositiveNumber(maxHeight)) {
+      throw new Error(
+        '"optimization.maxHeight" must be a positive number in asset-inspector.config.json',
+      );
+    }
+
+    if (
+      highSeverityScore !== undefined &&
+      !isPositiveNumber(highSeverityScore)
+    ) {
+      throw new Error(
+        '"optimization.highSeverityScore" must be a positive number in asset-inspector.config.json',
       );
     }
   }

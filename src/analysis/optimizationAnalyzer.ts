@@ -1,6 +1,7 @@
 import type { AssetInfo } from "../scanner/fileScanner.js";
 import {
   optimizationRules,
+  type OptimizationOptions,
   type OptimizationRuleResult,
 } from "./optimizationRule.js";
 
@@ -14,12 +15,17 @@ export type OptimizationResult = {
   reasons: string[];
 };
 
-export function analyzeOptimization(assets: AssetInfo[]): OptimizationResult[] {
+export function analyzeOptimization(
+  assets: AssetInfo[],
+  options: OptimizationOptions = {},
+): OptimizationResult[] {
+  const highSeverityScore = options?.highSeverityScore ?? 2;
+
   return assets.map((asset) => {
     const ruleResults: OptimizationRuleResult[] = [];
 
     for (const rule of optimizationRules) {
-      const result = rule(asset);
+      const result = rule(asset, options);
 
       if (result) {
         ruleResults.push(result);
@@ -43,7 +49,7 @@ export function analyzeOptimization(assets: AssetInfo[]): OptimizationResult[] {
     };
 
     if (isCandidate) {
-      optimizationResult.severity = score >= 2 ? "high" : "low";
+      optimizationResult.severity = score >= highSeverityScore ? "high" : "low";
     }
 
     return optimizationResult;
