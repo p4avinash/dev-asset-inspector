@@ -48,10 +48,10 @@ npm install -D dev-asset-inspector
 ```ts
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
-import devAssets from "dev-asset-inspector/vite";
+import { assetInspectorPlugin } from "dev-asset-inspector/vite";
 
 export default defineConfig({
-  plugins: [react(), devAssets()],
+  plugins: [react(), assetInspectorPlugin()],
 });
 ```
 
@@ -60,13 +60,18 @@ The plugin serves live analysis endpoints during development (`/__dev-assets` an
 ### 2. Mount Component (`src/App.tsx`)
 
 ```tsx
-import { DevAssets } from "dev-asset-inspector-ui";
+import {
+  AssetInspector,
+  InspectorHost,
+  FloatingButton,
+  InspectorPanel
+} from "dev-asset-inspector/react";
 
 function App() {
   return (
     <>
       <YourApplication />
-      {import.meta.env.DEV && <DevAssets />}
+      {import.meta.env.DEV && <AssetInspector />}
     </>
   );
 }
@@ -200,13 +205,15 @@ Inspect project assets directly from the terminal without starting the dev serve
 
 ```bash
 # Human-readable terminal report
-npx asset-inspector .
+npx dev-asset-inspector <project-path>
+# or alias
+npx asset-inspector <project-path>
 
 # Machine-readable JSON output (ideal for CI pipelines)
-npx asset-inspector . --json
+npx dev-asset-inspector <project-path> --json
 
 # Help & options
-npx asset-inspector --help
+npx dev-asset-inspector --help
 ```
 
 ---

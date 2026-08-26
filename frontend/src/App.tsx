@@ -1,4 +1,4 @@
-import { AssetInspector } from "./components/inspector/AssetInspector";
+import { AssetInspector } from "./index";
 
 function App() {
   return (
@@ -14,4 +14,3 @@ function App() {
 }
 
 export default App;
-
