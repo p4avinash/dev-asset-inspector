@@ -101,7 +101,35 @@ export function formatAssetInspectionReport(
       lines.push("  Referenced in:");
 
       for (const sourceFile of result.referencedIn) {
-        lines.push(`  - ${sourceFile}`);
+        lines.push("  - " + sourceFile);
+      }
+    }
+  }
+
+  // --------------------------------
+  // IMPACT
+  // --------------------------------
+
+  lines.push("");
+  lines.push("ASSET IMPACT:");
+
+  const impactResults = [...report.impact].sort((a, b) => b.score - a.score);
+
+  if (impactResults.length === 0) {
+    lines.push("No impact results found.");
+  }
+
+  for (const result of impactResults) {
+    lines.push("");
+    lines.push(`File: ${result.asset.name}`);
+    lines.push(`Score: ${result.score}`);
+    lines.push(`Priority: ${result.priority}`);
+
+    if (result.reasons.length > 0) {
+      lines.push("Reasons:");
+
+      for (const reason of result.reasons) {
+        lines.push(`- ${reason}`);
       }
     }
   }

@@ -9,6 +9,7 @@ import { formatAssetInspectionReport } from "./report/reportFormatter.js";
 import { parseArguments, printHelp } from "./cli/argumentParser.js";
 import { formatAssetInspectionReportAsJson } from "./report/reportJsonFormatter.js";
 import { loadConfig } from "./config/configLoader.js";
+import { analyzeImpact } from "./analysis/impactAnalyzer.js";
 
 const parseResult = parseArguments(process.argv.slice(2));
 
@@ -61,6 +62,13 @@ const optimizationResults = analyzeOptimization(assets, config.optimization);
 
 const usageResults = analyzeAssetUsage(projectRoot, assets);
 
+const impactResults = analyzeImpact(
+  assets,
+  duplicateGroups,
+  optimizationResults,
+  usageResults,
+);
+
 // --------------------------------
 // REPORT
 // --------------------------------
@@ -70,6 +78,7 @@ const report = createAssetInspectionReport(
   duplicateGroups,
   optimizationResults,
   usageResults,
+  impactResults,
 );
 
 // --------------------------------
