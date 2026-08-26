@@ -6,15 +6,19 @@
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
+    },
+    "./vite": {
+      "types": "./dist/vite/assetInspectorPlugin.d.ts",
+      "import": "./dist/vite/assetInspectorPlugin.js"
     }
   },
-"bin": {
-  "asset-inspector": "./bin/asset-inspector.cmd"
-},
-"files": [
-  "dist",
-  "bin"
-],
+  "bin": {
+    "asset-inspector": "./bin/asset-inspector.cmd"
+  },
+  "files": [
+    "dist",
+    "bin"
+  ],
   "scripts": {
     "build": "tsc",
     "prepublishOnly": "npm run build"
@@ -39,7 +43,16 @@
     "typescript": "^7.0.2"
   },
   "peerDependencies": {
-    "react": ">=18"
+    "react": ">=18",
+    "vite": ">=4.0.0"
+  },
+  "peerDependenciesMeta": {
+    "vite": {
+      "optional": true
+    },
+    "react": {
+      "optional": true
+    }
   },
   "dependencies": {
     "file-type": "^22.0.2",

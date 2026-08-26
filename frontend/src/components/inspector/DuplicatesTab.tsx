@@ -79,21 +79,46 @@ export function DuplicatesTab({ duplicates }: DuplicatesTabProps) {
                       isCanonical ? "inspector-duplicate-asset--canonical" : ""
                     }`}
                   >
-                    <div className="inspector-duplicate-asset__icon">
-                      {asset.extension.toUpperCase()}
+                    <div
+                      className="inspector-duplicate-asset__icon inspector-checkerboard"
+                      title={asset.name}
+                    >
+                      <img
+                        src={`/${asset.path.replace(/^\/+/, "")}`}
+                        alt={asset.name}
+                        className="inspector-duplicate-asset__thumb"
+                        onError={(e) => {
+                          e.currentTarget.style.display = "none";
+                          const fallback = e.currentTarget
+                            .nextElementSibling as HTMLElement;
+                          if (fallback) fallback.style.display = "flex";
+                        }}
+                      />
+                      <span
+                        className="inspector-duplicate-asset__thumb-fallback"
+                        style={{ display: "none" }}
+                      >
+                        {asset.extension.replace(".", "").toUpperCase()}
+                      </span>
                     </div>
 
                     <div className="inspector-duplicate-asset__content">
-                      <strong>{asset.name}</strong>
+                      <div className="inspector-duplicate-asset__title-row">
+                        <strong>{asset.name}</strong>
+
+                        {isCanonical ? (
+                          <span className="inspector-duplicate-asset__badge">
+                            Canonical
+                          </span>
+                        ) : (
+                          <span className="inspector-duplicate-asset__badge inspector-duplicate-asset__badge--dup">
+                            Duplicate
+                          </span>
+                        )}
+                      </div>
 
                       <span>{asset.path}</span>
                     </div>
-
-                    {isCanonical && (
-                      <span className="inspector-duplicate-asset__badge">
-                        Canonical
-                      </span>
-                    )}
                   </div>
                 );
               })}

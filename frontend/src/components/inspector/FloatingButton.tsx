@@ -16,6 +16,7 @@ export function FloatingButton({ onClick }: FloatingButtonProps) {
       </span>
 
       <span className="inspector-floating-button-label">Assets</span>
+      <span className="inspector-floating-button-dot" aria-hidden="true" />
     </button>
   );
 }

@@ -7,25 +7,51 @@ import { DuplicatesTab } from "./DuplicatesTab";
 import { OptimizationTab } from "./OptimizationTab";
 
 type InspectorPanelProps = {
-  report: AssetInspectionReport;
+  report: AssetInspectionReport | null;
+  isLoading?: boolean;
+  error?: string | null;
+  onRefresh?: () => void;
+  onUseMockData?: () => void;
   maximized: boolean;
+  isClosing?: boolean;
   onClose: () => void;
   onToggleMaximize: () => void;
 };
 
 export function InspectorPanel({
   report,
+  isLoading = false,
+  error = null,
+  onRefresh,
+  onUseMockData,
   maximized,
+  isClosing = false,
   onClose,
   onToggleMaximize,
 }: InspectorPanelProps) {
   const [activeTab, setActiveTab] = useState<InspectorTab>("overview");
+  const [theme, setTheme] = useState<"dark" | "light">(() => {
+    try {
+      const saved = localStorage.getItem("dev-asset-inspector-theme");
+      if (saved === "light" || saved === "dark") return saved;
+    } catch {}
+    return "dark";
+  });
+
+  const toggleTheme = () => {
+    const next = theme === "dark" ? "light" : "dark";
+    setTheme(next);
+    try {
+      localStorage.setItem("dev-asset-inspector-theme", next);
+    } catch {}
+  };
 
   return (
     <section
       className={`inspector-panel ${
         maximized ? "inspector-panel--maximized" : ""
-      }`}
+      } ${isClosing ? "inspector-panel--closing" : ""}`}
+      data-theme={theme}
       aria-label="Dev Asset Inspector"
     >
       <header className="inspector-panel__header">
@@ -39,6 +65,31 @@ export function InspectorPanel({
         </div>
 
         <div className="inspector-panel__actions">
+          {onRefresh && (
+            <button
+              type="button"
+              onClick={onRefresh}
+              disabled={isLoading}
+              aria-label="Refresh analysis"
+              title="Rescan project assets"
+              className={`inspector-refresh-btn ${
+                isLoading ? "inspector-refresh-btn--spinning" : ""
+              }`}
+            >
+              ↻
+            </button>
+          )}
+
+          <button
+            type="button"
+            onClick={toggleTheme}
+            aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
+            title={`Switch to ${theme === "dark" ? "Light" : "Dark"} mode`}
+            className="inspector-theme-btn"
+          >
+            {theme === "dark" ? "☀️" : "🌙"}
+          </button>
+
           <button
             type="button"
             onClick={onToggleMaximize}
@@ -62,31 +113,90 @@ export function InspectorPanel({
       <InspectorTabs activeTab={activeTab} onTabChange={setActiveTab} />
 
       <div className="inspector-panel__body">
-        {activeTab === "overview" && <OverviewTab summary={report.summary} />}
-
-        {activeTab === "assets" && (
-          <AssetsTab assets={report.assets} usage={report.usage} />
+        {isLoading && !report && (
+          <div className="inspector-tab-placeholder">
+            <span className="inspector-tab-placeholder__icon">↻</span>
+            <h3>Analyzing Project Assets</h3>
+            <p>Scanning project directories for images and SVGs...</p>
+          </div>
         )}
 
-        {activeTab === "duplicates" && (
+        {error && !report && (
+          <div className="inspector-tab-placeholder inspector-tab-placeholder--error">
+            <span className="inspector-tab-placeholder__icon">!</span>
+            <h3>Unable to scan assets</h3>
+            <p>{error}</p>
+            <div className="inspector-tab-placeholder__actions">
+              {onRefresh && (
+                <button
+                  type="button"
+                  className="inspector-action-btn"
+                  onClick={onRefresh}
+                >
+                  Retry Scan
+                </button>
+              )}
+              {onUseMockData && (
+                <button
+                  type="button"
+                  className="inspector-action-btn"
+                  onClick={onUseMockData}
+                >
+                  Preview Mock Data
+                </button>
+              )}
+            </div>
+          </div>
+        )}
+
+        {report && activeTab === "overview" && (
+          <OverviewTab report={report} onNavigateTab={setActiveTab} />
+        )}
+
+        {report && activeTab === "assets" && (
+          <AssetsTab
+            assets={report.assets}
+            usage={report.usage}
+            duplicates={report.duplicates}
+          />
+        )}
+
+        {report && activeTab === "duplicates" && (
           <DuplicatesTab duplicates={report.duplicates} />
         )}
 
-        {activeTab === "optimization" && (
+        {report && activeTab === "optimization" && (
           <OptimizationTab optimization={report.optimization} />
         )}
       </div>
 
       <footer className="inspector-panel__footer">
-        <span>Dev Asset Inspector</span>
+        <div className="inspector-panel__status">
+          <span
+            className={`inspector-status-dot ${
+              isLoading ? "inspector-status-dot--loading" : ""
+            }`}
+          />
+          <span>
+            {isLoading
+              ? "Scanning project assets..."
+              : error && !report
+                ? "Analysis offline"
+                : `${report?.assets.length ?? 0} assets scanned`}
+          </span>
+        </div>
 
-        <button
-          type="button"
-          className="inspector-panel__refresh"
-          title="Refresh asset analysis"
-        >
-          ↻ Refresh
-        </button>
+        {onRefresh && (
+          <button
+            type="button"
+            className="inspector-footer-refresh-btn"
+            title="Rescan project assets"
+            onClick={onRefresh}
+            disabled={isLoading}
+          >
+            {isLoading ? "Rescanning..." : "↻ Rescan"}
+          </button>
+        )}
       </footer>
     </section>
   );

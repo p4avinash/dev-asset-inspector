@@ -1,8 +1,10 @@
 export type ImpactPriority = "low" | "medium" | "high" | "critical";
 
 export type AssetInfo = {
+  id?: string;
   name: string;
   path: string;
+  type?: string;
   extension: string;
   size: number;
   mimeType: string;
@@ -64,6 +66,7 @@ export type AssetInspectionSummary = {
 export type AssetInspectionReport = {
   assets: AssetInfo[];
   duplicates: DuplicateGroup[];
+  duplicateGroups?: DuplicateGroup[];
   optimization: OptimizationResult[];
   usage: AssetUsageResult[];
   impact: ImpactResult[];

@@ -1,15 +1,9 @@
 import fs from "node:fs";
 
-import { scanFiles } from "./scanner/fileScanner.js";
-import { findDuplicates } from "./analysis/duplicateDetector.js";
-import { analyzeOptimization } from "./analysis/optimizationAnalyzer.js";
-import { analyzeAssetUsage } from "./analysis/usageAnalyzer.js";
-import { createAssetInspectionReport } from "./report/reportGenerator.js";
+import { analyzeProject } from "./analyzer/analyzeProject.js";
 import { formatAssetInspectionReport } from "./report/reportFormatter.js";
-import { parseArguments, printHelp } from "./cli/argumentParser.js";
 import { formatAssetInspectionReportAsJson } from "./report/reportJsonFormatter.js";
-import { loadConfig } from "./config/configLoader.js";
-import { analyzeImpact } from "./analysis/impactAnalyzer.js";
+import { parseArguments, printHelp } from "./cli/argumentParser.js";
 
 const parseResult = parseArguments(process.argv.slice(2));
 
@@ -33,62 +27,15 @@ if (!projectRoot) {
 
 if (!fs.existsSync(projectRoot)) {
   console.error(`Project path does not exist: ${projectRoot}`);
-
   process.exit(1);
 }
 
 if (!fs.statSync(projectRoot).isDirectory()) {
   console.error(`Project path is not a directory: ${projectRoot}`);
-
   process.exit(1);
 }
 
-const config = loadConfig(projectRoot);
-
-// --------------------------------
-// ANALYSIS
-// --------------------------------
-
-const assets = await scanFiles(
-  projectRoot,
-  config.assets?.ignore ?? [],
-  projectRoot,
-  config.assets?.extensions ?? [],
-);
-
-const duplicateGroups = findDuplicates(assets);
-
-const optimizationResults = analyzeOptimization(assets, config.optimization);
-
-const usageResults = analyzeAssetUsage(projectRoot, assets);
-
-const impactResults = analyzeImpact(
-  assets,
-  duplicateGroups,
-  optimizationResults,
-  usageResults,
-  config.impact?.weights
-    ? {
-        weights: config.impact.weights,
-      }
-    : {},
-);
-
-// --------------------------------
-// REPORT
-// --------------------------------
-
-const report = createAssetInspectionReport(
-  assets,
-  duplicateGroups,
-  optimizationResults,
-  usageResults,
-  impactResults,
-);
-
-// --------------------------------
-// CLI OUTPUT
-// --------------------------------
+const report = await analyzeProject(projectRoot);
 
 if (json) {
   console.log(formatAssetInspectionReportAsJson(report));

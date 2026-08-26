@@ -4,6 +4,7 @@ import { FloatingButton } from "./FloatingButton";
 import { InspectorPanel } from "./InspectorPanel";
 import inspectorStyles from "./inspector.css?inline";
 import { mockReport } from "../../data/mockReport";
+import type { AssetInspectionReport } from "../../types/assetReport";
 
 export function AssetInspector() {
   const hostRef = useRef<HTMLDivElement>(null);
@@ -11,6 +12,38 @@ export function AssetInspector() {
 
   const [isOpen, setIsOpen] = useState(false);
   const [isMaximized, setIsMaximized] = useState(false);
+
+  const [report, setReport] = useState<AssetInspectionReport | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchReport = async () => {
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const response = await fetch(
+        `/__dev-asset-inspector/report?t=${Date.now()}`,
+      );
+
+      if (!response.ok) {
+        throw new Error(
+          `Failed to fetch report from server (HTTP ${response.status})`,
+        );
+      }
+
+      const data = (await response.json()) as AssetInspectionReport;
+      setReport(data);
+    } catch (err: any) {
+      console.warn("[dev-asset-inspector] Failed to fetch live report:", err);
+      setError(
+        err?.message ||
+          "Unable to connect to dev server. Ensure assetInspectorPlugin() is registered in your vite.config.ts.",
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
     const host = hostRef.current;
@@ -45,13 +78,27 @@ export function AssetInspector() {
     setContainer(mountPoint);
   }, []);
 
+  useEffect(() => {
+    fetchReport();
+  }, []);
+
+  const [isClosing, setIsClosing] = useState(false);
+
   const handleOpen = () => {
+    setIsClosing(false);
     setIsOpen(true);
+    if (!report && !isLoading) {
+      fetchReport();
+    }
   };
 
   const handleClose = () => {
-    setIsOpen(false);
-    setIsMaximized(false);
+    setIsClosing(true);
+    setTimeout(() => {
+      setIsOpen(false);
+      setIsClosing(false);
+      setIsMaximized(false);
+    }, 200);
   };
 
   const handleToggleMaximize = () => {
@@ -67,8 +114,16 @@ export function AssetInspector() {
 
               {isOpen && (
                 <InspectorPanel
-                  report={mockReport}
+                  report={report}
+                  isLoading={isLoading}
+                  error={error}
+                  onRefresh={fetchReport}
+                  onUseMockData={() => {
+                    setReport(mockReport);
+                    setError(null);
+                  }}
                   maximized={isMaximized}
+                  isClosing={isClosing}
                   onClose={handleClose}
                   onToggleMaximize={handleToggleMaximize}
                 />
