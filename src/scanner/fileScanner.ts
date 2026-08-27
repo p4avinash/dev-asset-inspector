@@ -38,8 +38,10 @@ const MIME_TYPES: Record<string, string> = {
 };
 
 export type AssetInfo = {
+  id?: string;
   name: string;
   path: string;
+  type?: string;
   extension: string;
   detectedExtension?: string;
   size: number;
@@ -126,8 +128,10 @@ export async function scanFiles(
       const hash = await getFileHash(fullPath);
 
       const asset: AssetInfo = {
+        id: fullPath,
         name: entry.name,
         path: fullPath,
+        type: extension.replace(".", "").toLowerCase(),
         extension,
         size: stats.size,
         mimeType,

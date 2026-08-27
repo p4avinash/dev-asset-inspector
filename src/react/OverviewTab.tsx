@@ -3,7 +3,7 @@ import type {
   AssetInfo,
   AssetInspectionReport,
   AssetInspectionSummary,
-} from "../../types/assetReport";
+} from "./types.js";
 
 type OverviewTabProps = {
   report?: AssetInspectionReport;

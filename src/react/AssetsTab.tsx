@@ -3,7 +3,7 @@ import type {
   AssetInfo,
   AssetUsageResult,
   DuplicateGroup,
-} from "../../types/assetReport";
+} from "./types.js";
 
 type AssetsTabProps = {
   assets: AssetInfo[];

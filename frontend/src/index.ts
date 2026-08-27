@@ -1,4 +1,9 @@
-export { AssetInspector } from "./components/inspector/AssetInspector";
-export { InspectorHost } from "./components/inspector/InspectorHost";
-export { FloatingButton } from "./components/inspector/FloatingButton";
-export { InspectorPanel } from "./components/inspector/InspectorPanel";
+export {
+  AssetInspector,
+  AssetInspector as DevAssets,
+  InspectorHost,
+  FloatingButton,
+  InspectorPanel,
+  inspectorStyles,
+} from "../../src/react/index.js";
+export type * from "../../src/react/index.js";

@@ -1,4 +1,4 @@
-import type { OptimizationResult } from "../../types/assetReport";
+import type { OptimizationResult } from "./types.js";
 
 type OptimizationTabProps = {
   optimization: OptimizationResult[];

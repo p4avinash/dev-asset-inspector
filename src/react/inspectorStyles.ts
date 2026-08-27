@@ -1,4 +1,5 @@
-@import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap");
+// Auto-generated from inspector.css by scripts/build-assets.js
+export const inspectorStyles = `@import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap");
 
 /* --------------------------------
    DESIGN SYSTEM & CSS VARIABLES
@@ -1992,3 +1993,4 @@
   border-color: var(--insp-accent);
   color: var(--insp-accent);
 }
+`;

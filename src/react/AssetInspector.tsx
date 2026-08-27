@@ -1,10 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { FloatingButton } from "./FloatingButton";
-import { InspectorPanel } from "./InspectorPanel";
-import inspectorStyles from "./inspector.css?inline";
-import { mockReport } from "../../data/mockReport";
-import type { AssetInspectionReport } from "../../types/assetReport";
+import { FloatingButton } from "./FloatingButton.js";
+import { InspectorPanel } from "./InspectorPanel.js";
+import { inspectorStyles } from "./inspectorStyles.js";
+import { mockReport } from "./mockReport.js";
+import type { AssetInspectionReport } from "./types.js";
 
 export function AssetInspector() {
   const hostRef = useRef<HTMLDivElement>(null);

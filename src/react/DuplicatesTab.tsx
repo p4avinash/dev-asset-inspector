@@ -1,4 +1,4 @@
-import type { DuplicateGroup } from "../../types/assetReport";
+import type { DuplicateGroup } from "./types.js";
 
 type DuplicatesTabProps = {
   duplicates: DuplicateGroup[];

@@ -26,6 +26,7 @@ export type AssetInspectionSummary = {
 export type AssetInspectionReport = {
   assets: AssetInfo[];
   duplicates: DuplicateGroup[];
+  duplicateGroups?: DuplicateGroup[];
   optimization: OptimizationResult[];
   usage: AssetUsageResult[];
   impact: ImpactResult[];
@@ -134,6 +135,7 @@ export function createAssetInspectionReport(
   return {
     assets,
     duplicates,
+    duplicateGroups: duplicates,
     optimization,
     usage,
     impact,

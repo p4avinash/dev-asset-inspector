@@ -9,7 +9,7 @@ export type AssetInfo = {
   size: number;
   mimeType: string;
   typeMismatch: boolean;
-  hash: string;
+  hash?: string;
 
   detectedExtension?: string;
   detectedMimeType?: string;
@@ -61,6 +61,13 @@ export type AssetInspectionSummary = {
   optimizationCandidates: number;
   highSeverityCandidates: number;
   typeMismatches: number;
+
+  topIssues?: string[];
+  highestImpactAssets?: {
+    asset: AssetInfo;
+    score: number;
+    priority: ImpactPriority;
+  }[];
 };
 
 export type AssetInspectionReport = {

@@ -1,10 +1,10 @@
 import { useState } from "react";
-import type { AssetInspectionReport } from "../../types/assetReport";
-import { InspectorTabs, type InspectorTab } from "./InspectorTabs";
-import { OverviewTab } from "./OverviewTab";
-import { AssetsTab } from "./AssetsTab";
-import { DuplicatesTab } from "./DuplicatesTab";
-import { OptimizationTab } from "./OptimizationTab";
+import type { AssetInspectionReport } from "./types.js";
+import { InspectorTabs, type InspectorTab } from "./InspectorTabs.js";
+import { OverviewTab } from "./OverviewTab.js";
+import { AssetsTab } from "./AssetsTab.js";
+import { DuplicatesTab } from "./DuplicatesTab.js";
+import { OptimizationTab } from "./OptimizationTab.js";
 
 type InspectorPanelProps = {
   report: AssetInspectionReport | null;

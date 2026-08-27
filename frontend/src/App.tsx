@@ -1,5 +1,4 @@
-import { AssetInspector } from "./components/inspector/AssetInspector";
-import { InspectorHost } from "./components/inspector/InspectorHost";
+import { AssetInspector } from "./index";
 
 function App() {
   return (
@@ -9,7 +8,7 @@ function App() {
         <p>This represents the user's application.</p>
       </main>
 
-      <InspectorHost />
+      <AssetInspector />
     </>
   );
 }
