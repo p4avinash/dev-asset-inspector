@@ -18,8 +18,8 @@
     }
   },
   "bin": {
-    "dev-asset-inspector": "./bin/asset-inspector.js",
-    "asset-inspector": "./bin/asset-inspector.js"
+    "dev-asset-inspector": "bin/asset-inspector.js",
+    "asset-inspector": "bin/asset-inspector.js"
   },
   "files": [
     "dist",
